@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Force Layout with labels on edges</title>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="index.js"></script>
+
+<style type="text/css">
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+</style>
+</head>
+<body>
+
+<script type="text/javascript">
+//<Style> div above included in case tool tips would be necessary in the future
+    var w = 1000;
+    var h = 600;
+    var linkDistance=200;
+
+//The arrays of links and nodes to be inputted into the graph. the radius and color arguments
+//apply to the node size and color, while width and color apply to the edge "thickness" and color.
+    var dataset = {
+
+nodes: [
+{name: "Maleic Acid (115.0 / 71.0 (2))", radius: 1, color: '#1f77b4'},
+{name: "Fumaric (115.0 / 71.0)", radius: 1, color: '#1f77b4'},
+{name: "Alpha-Ketoglutaric Acid (145.0 / 101.0)", radius: 2, color: '#1f77b4'},
+{name: "MethylSuccinate (131.0 / 113.0)", radius: 2, color: '#1f77b4'},
+{name: "Oxalic Acid (89.0 / 61.0)", radius: 2,color: '#1f77b4'},
+{name: "Xanthosine (283.1 / 151.0)", radius: 2, color: '#1f77b4'},
+{name: "Glutamine (147.1 / 84.0)", radius: 2, color: '#1f77b4'},
+{name: "Citraconic Acid (129.0 / 85.0)", radius: 2, color: '#1f77b4'},
+{name: "Xanthine (151.0 / 108.0)", radius: 2, color: '#1f77b4'},
+{name: "Aconitate (173.0 / 129.0)", radius: 2, color: '#1f77b4'},
+{name: "Asparagine (133.1 / 74.0)", radius: 2, color: '#1f77b4'},
+{name: "lactate (89.0 / 43.0)", radius: 2, color: '#1f77b4'},
+{name: "Orotate (155.0 / 111.0)", radius: 2, color:'#1f77b4'}
+],
+edges: [
+{source: 7, target: 9, width: 0.5, color: '#ccc'},
+{source: 6, target: 2, width: 0.8, color: '#ccc'},
+{source: 0, target: 1, width: 0.7, color: '#ccc'},
+{source: 3, target: 10, width: 0.5, color: '#1f77b4'},
+{source: 8, target: 12, width: 1.2, color: '#ccc'},
+{source: 5, target: 12, width: 1.5, color: '#ccc'},
+{source: 5, target: 8, width: 3.0, color: '#ccc'},
+{source: 11, target: 4, width: 1.0, color: '#ccc'},
+],    };
+
+    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
+//This commented section also included in case tooltips are necessary in future
+/*var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-5, 0])
+    .html(function(d) {
+    return "Type: " + d.name;
+});
+svg.call(tip);*/
+//initialization of "d3 force layout"
+    var force = d3.layout.force()
+        .nodes(dataset.nodes)
+        .links(dataset.edges)
+        .size([w,h])
+        .linkDistance([linkDistance])
+        .charge([-500])
+        .theta(0.1)
+        .gravity(0.05)
+        .start();
+
+//This is the initialization of the edges of each node
+    var edges = svg.selectAll("line")
+      .data(dataset.edges)
+      .enter()
+      .append("line")
+      .attr("id",function(d,i) {return 'edge'+i})
+      .attr('marker-end','url(#arrowhead)')
+      //takes in the color parameter from edges array above
+      .style("stroke", function(d) {return d.color;})
+      //takes in width parameter from edges array above
+      .style("stroke-width", function (d) {return d.width;})
+      .style("pointer-events", "none");
+ 
+    //initialization of the nodes portion of the force layout
+    var nodes = svg.selectAll("circle")
+      .data(dataset.nodes)
+      .enter().append("circle")
+      .attr("class", "node")
+ //takes in the radius parameter of the nodes array    
+         .attr("r", function(d){
+        if (d.radius === 1){
+          return d.radius*10;
+    } else {
+          return 10*d.radius;
+    }
+})
+//takes in the color parameter of the nodes array
+      .style("fill",function(d){return d.color;})
+      .call(force.drag);
+  /*   .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);*/
+
+//initializes the node labels
+    var nodelabels = svg.selectAll(".nodelabel") 
+       .data(dataset.nodes)
+       .enter()
+       .append("text")
+       //sets position of the node labels
+       .attr({"x":function(d){return d.x;},
+              "y":function(d){return d.y;},
+              "class":"nodelabel",
+              "stroke":"black"})
+       .text(function(d){return "Type: " + d.name;});
+//initializes the actual lines that make the edges and sets their beginning and end
+    var edgepaths = svg.selectAll(".edgepath")
+        .data(dataset.edges)
+        .enter()
+        .append('path')
+//sets beginning/end position of edges
+        .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+               'class':'edgepath',
+               'fill-opacity':0,
+               'stroke-opacity':0,
+               'fill':'blue',
+               'stroke':'red',
+               'id':function(d,i) {return 'edgepath'+i}})
+        .style("pointer-events", "none");
+//initializes the labels for the edges and sets their text and position
+    var edgelabels = svg.selectAll(".edgelabel")
+        .data(dataset.edges)
+        .enter()
+        .append('text')
+        .style("pointer-events", "none")
+        .attr({'class':'edgelabel',
+               'id':function(d,i){return 'edgelabel'+i},
+               'dx':0,
+               'dy':5,
+               'font-size':9,
+               'fill':'#aaa'});
+//appends a text path to edge labels to allow the "label 1" to be displayed
+    edgelabels.append('textPath')
+        .attr('xlink:href',function(d,i) {return '#edgepath'+i})
+        .style("pointer-events", "none")
+        .text(function(d,i){return 'label '+i});
+
+//appends the arrow on the end of each edge for stylistic purposes
+    svg.append('defs').append('marker')
+        .attr({'id':'arrowhead',
+               'viewBox':'-0 -5 10 10',
+               //sets x and y position of arorw
+               'refX':25,
+               'refY':0,
+               //'markerUnits':'strokeWidth',
+               'orient':'auto',
+               'markerWidth':10,
+               'markerHeight':10,
+               'xoverflow':'visible'})
+        .append('svg:path')
+            .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+            .attr('fill', '#ccc')
+            .attr('stroke','#ccc');
+     
+//sets position of nodes when force is initialized
+    force.on("tick", function(){
+
+        edges.attr({"x1": function(d){return d.source.x;},
+                    "y1": function(d){return d.source.y;},
+                    "x2": function(d){return d.target.x;},
+                    "y2": function(d){return d.target.y;}
+        });
+
+        nodes.attr({"cx":function(d){return d.x;},
+                    "cy":function(d){return d.y;}
+        });
+//sets position of node labels when force is initialized
+        nodelabels.attr("x", function(d) { return d.x; }) 
+                  .attr("y", function(d) { return d.y; });
+//sets position of edges when force is initialized
+        edgepaths.attr('d', function(d) { var path='M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;
+                                           //console.log(d)
+                                           return path});       
+//sets position of edge labels when force is intialized
+        edgelabels.attr('transform',function(d,i){
+            if (d.target.x<d.source.x){
+                bbox = this.getBBox();
+                rx = bbox.x+bbox.width/2;
+                ry = bbox.y+bbox.height/2;
+                return 'rotate(180 '+rx+' '+ry+')';
+                }
+            else {
+                return 'rotate(0)';
+                }
+        });
+    });
+
+</script>
+
+</body>
+</html>

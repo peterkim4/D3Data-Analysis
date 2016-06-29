@@ -1,0 +1,37 @@
+
+{
+  "nodes": [
+    {"x": 469, "y": 410, "name": "F16BP/F26BP"},
+    {"x": 493, "y": 364, "name": "G16BP"},
+    {"x": 442, "y": 365, "name": "Glucose"},
+    {"x": 467, "y": 314, "name": "lactate"},
+    {"x": 477, "y": 248, "name": "PEP"},
+    {"x": 440, "y": 200, "name": "Pyruvate"},
+    {"x": 420, "y": 220, "name": "Malate"},
+    {"x": 400, "y": 240, "name": "D-GA3P/DHAP"},
+    {"x": 380, "y": 260, "name": "Oxaloacetate"}
+  ],
+  "links": [
+    {"source":  0, "target":  7},
+    {"source":  1, "target":  7},
+    {"source":  1, "target":  0},
+    {"source":  2, "target":  1},
+    {"source":  2, "target":  7},
+    {"source":  3, "target":  7},
+    {"source":  3, "target":  4},
+    {"source":  3, "target":  1},
+    {"source":  3, "target":  2},
+    {"source":  4, "target":  7},
+    {"source":  4, "target":  1},
+    {"source":  4, "target":  2},
+    {"source":  4, "target":  3},
+    {"source":  5, "target":  2},
+    {"source":  5, "target":  3},
+    {"source":  6, "target":  1},
+    {"source":  6, "target":  0},
+    {"source":  6, "target":  7},
+    {"source":  6, "target":  3},
+    {"source":  6, "target":  8},
+    {"source":  6, "target":  4}
+  ]
+}
